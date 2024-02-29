@@ -1,8 +1,9 @@
-# {eac}SoftwareRegistry Subscriptions for WooCommerce  
+## {eac}SoftwareRegistry Subscriptions for WooCommerce  
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
+[![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
 
-<details><summary>Plugin Header</summary><samp>
+<details><summary>Plugin Header</summary>
 
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
@@ -19,11 +20,12 @@ License URI:            https://www.gnu.org/licenses/gpl.html
 Tags:                   software registration, WooCommerce, WooCommerce Subscriptions, Webhooks, subscriptions, software registry, software license, {eac}SoftwareRegistry  
 WordPress URI:          https://wordpress.org/plugins/eacsoftwareregistry-subscription-webhooks/  
 Github URI:             https://github.com/EarthAsylum/eacsoftwareregistry-subscription-webhooks/  
-</samp></details>
 
-**_Adds a custom Webhook topic to WooCommerrce Webhooks for subscription updates; adds subscription and product data to WooCommerce order Webhooks._**
+</details>
 
-## Description
+> Adds a custom Webhook topic to WooCommerrce Webhooks for subscription updates; adds subscription and product data to WooCommerce order Webhooks.
+
+### Description
 
 **{eac}SoftwareRegistry Subscriptions for WooCommerce** is a plugin, installed on your WooCommerce site, that adds a custom Webhook topic for subscription updates to the WooCommerrce Webhooks, and adds subscription and product data to WooCommerce order Webhooks.
 
@@ -117,7 +119,7 @@ With this configuration, you can pass registry values (registry_*) in the produc
 See [{eac}SoftwareRegistry WebHooks for WooCommerce](https://swregistry.earthasylum.com/webhooks-for-woocommerce/) for more information.
 
 
-## Installation
+### Installation
 
 This plugin is intended to be installed on your WooCommerce store site (not necessarily your software registration server).
 
@@ -144,7 +146,7 @@ See [Managing Plugins -> Manual Plugin Installation](https://wordpress.org/suppo
 Options for this plugin will be found on the *WooCommerce → Settings → Advanced → Webhooks* page.
 
 
-## Screenshots
+### Screenshots
 
 1. WooCommerce > Settings > Advanced > Webhooks
 ![{eac}SoftwareRegistry Subscriptions for WooCommerce](https://ps.w.org/eacsoftwareregistry-subscription-webhooks/assets/screenshot-1.png)
@@ -153,7 +155,7 @@ Options for this plugin will be found on the *WooCommerce → Settings → Advan
 ![{eac}SoftwareRegistry Subscriptions for WooCommerce](https://ps.w.org/eacsoftwareregistry-subscription-webhooks/assets/screenshot-2.png)
 
 
-## Other Notes
+### Other Notes
 
 #### Additional Information
 
