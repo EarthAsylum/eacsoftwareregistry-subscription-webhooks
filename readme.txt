@@ -1,17 +1,17 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             1.0.9
-Last Updated:           11-Nov-2022
+Stable tag:             2.0.0
+Last Updated:           04-Apr-2024
 Requires at least:      5.5.0
-Tested up to:           6.4
+Tested up to:           6.5
 WC requires at least:   5.2
-WC tested up to:        8.2
+WC tested up to:        8.7
 Requires PHP:           7.2
 Contributors:           kevinburkholder
 License:                GPLv3 or later
 License URI:            https://www.gnu.org/licenses/gpl.html
-Tags:                   software registration, WooCommerce, WooCommerce Subscriptions, Webhooks, subscriptions, software registry, software license, {eac}SoftwareRegistry
+Tags:                   software registration, WooCommerce, WooCommerce Subscriptions, Webhooks, sumo subscriptions, subscriptions, software registry, software license, {eac}SoftwareRegistry
 WordPress URI:          https://wordpress.org/plugins/eacsoftwareregistry-subscription-webhooks/
 Github URI:             https://github.com/EarthAsylum/eacsoftwareregistry-subscription-webhooks/
 
@@ -27,6 +27,8 @@ Adds a custom Webhook topic to WooCommerrce Webhooks for subscription updates; a
 
 +   Adds product meta data to order and subscription records passed through WooCommerce webhooks.
 
++   Works with WooCommerce Subscriptions - and - SUMO Subscriptions.
+
 When WooCommerce creates an order, the order is stored as a post with type set to "*shop_order*". When the order is for a subscription, a related order is stored as a post with type set to "*shop_subscription*". When a subscription is renewed, a new "*shop_order*" is created related back to the original "*shop_subscription*" order.
 
 When subscriptions (*shop_subscription*) are passed through the *"{eac}SoftwareRegistry Subscription updated"* webhook, additional subscription data and related order numbers are added to the subscription order record being passed.
@@ -39,10 +41,12 @@ For order webhooks, options are presented on the "Webhook" edit screen to choose
 
 WooCommerce Webhooks are created by going to: *WooCommerce → Settings → Advanced → Webhooks* in the administration of your store site.
 
+With version 2+, *SUMO Subscriptions* is also supported in nearly the same way as WooCommerce Subscriptions by creating a pseudo *shop_subscription* order from the SUMO Subscription post record and the original or renewal WooCommerce *shop_order*.
+
 
 = Subscriptions =
 
-To create a webhook for subscription updates, choose *"{eac}SoftwareRegistry Subscription updated"* for the topic on the *Webhook data* screen.
+To create a webhook for subscription updates, choose *"{eac}SoftwareRegistry Subscription updated"*, when using Woo Subscriptions, or *"{eac}SoftwareRegistry Sumo Subscription"*, when using SUMO Subscriptions, for the topic on the *Webhook data* screen.
 
 Whenever a subscription is updated, the subscription data will be sent to the *Delivery URL* specified in the Webhook.
 
@@ -52,6 +56,7 @@ Whenever a subscription is updated, the subscription data will be sent to the *D
 This plugin also adds subscription data to orders passed through the *Order created*, *Order updated*, and *Order restored* webhooks when the order has related subscription(s).
 
 Orders without subscriptions may be appended with meta data from the products in the order.
+
 
 = Subscription Data =
 
@@ -85,19 +90,26 @@ product_meta includes:
       'sku'                         => string       // product sku,
       'attributes'                  => array        // product attributes (name => value)
       'meta_data'                   => array        // product custom fields (name => value)
+      'categories'                  => array        // product categories (slug => name)
 
 
-For the subscription webhook, this data is overlayed on the *shop_subscription* order created by WooCommerce.
+For the subscription webhook, this data is overlayed on the *subscription* order created by WooCommerce.
 
-For the order webhooks, this data is overlayed on the related *shop_subscription* order and appended to the *shop_order* in a "subscriptions" array, indexed by id (allowing for multiple subscriptions per order).
+For the order webhooks, this data is overlayed on the related *subscription* order and appended to the *shop_order* in a "subscriptions" array, indexed by id (allowing for multiple subscriptions per order).
 
 For orders without subscriptions, the product_meta array is appended to the *shop_order*.
+
+
+= SUMO Subscriptions =
+
+The pseudo subscription order is built by taking the SUMO subscription post record and overlaying the most recent *shop_order*. The 'id' number of the pseudo order is the subscription post id. The parent id is the original *shop_order* that created the subscription.
+
 
 = Using With {eac}SoftwareRegistry Registration Server =
 
 You must have the [{eac}SoftwareRegistry WebHooks for WooCommerce](https://swregistry.earthasylum.com/webhooks-for-woocommerce/) extension enabled on your Software Registration server.
 
-When creating a subscription webhook, the *Delivery URL* for *"{eac}SoftwareRegistry Subscription updated"* is:
+When creating a subscription webhook, the *Delivery URL* for *"{eac}SoftwareRegistry Subscription updated"* and *"{eac}SoftwareRegistry Sumo Subscription"* is:
 `https://{your_registration_server}.com/wp-json/softwareregistry/v1/wc-subscription`
 
 When creating order webhooks, the *Delivery URL* for *Order created*, *Order updated*, *Order deleted* and *Order restored* is:
@@ -151,7 +163,7 @@ Options for this plugin will be found on the *WooCommerce → Settings → Advan
 
 = Additional Information =
 
-Requires [WooCommerce](https://woocommerce.com/) and either [WooCommerce Payments](https://woocommerce.com/payments/) (with subscriptions) or [WooCommerce Subscriptions](https://woocommerce.com/document/subscriptions/).
+Requires [WooCommerce](https://woocommerce.com/) and either [WooCommerce Payments](https://woocommerce.com/payments/) (with subscriptions), [WooCommerce Subscriptions](https://woocommerce.com/document/subscriptions/) or [SUMO Subscriptions](https://codecanyon.net/item/sumo-subscriptions-woocommerce-subscription-system/16486054).
 
 +   Developed for use with [{eac}SoftwareRegistry Registration Server](https://swregistry.earthasylum.com/).
 +   Nonetheless can be used wherever subscriptions or additional product details are needed in WooCommerce webhooks.
@@ -164,7 +176,7 @@ Requires [WooCommerce](https://woocommerce.com/) and either [WooCommerce Payment
 
 == Copyright ==
 
-= Copyright © 2022, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
+= Copyright © 2024, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -174,6 +186,13 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.0.0 – April 4, 2024 =
+
++   Supportes SUMO Subscriptions.
++   Added 'current_action' to the webhook data.
++   Added 'categories' to product_meta.
++   Compatible with WordPress 6.5+ and WooCommerce 8.7+
 
 = Version 1.0.9 – November 11, 2022 =
 

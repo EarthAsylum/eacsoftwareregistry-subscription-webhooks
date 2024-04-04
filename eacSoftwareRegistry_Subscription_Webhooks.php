@@ -11,18 +11,18 @@
  * @category	WordPress Plugin
  * @package		{eac}SoftwareRegistry\Webhook
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2022 EarthAsylum Consulting <www.earthasylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		2.x
  *
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					1.0.9
+ * Version:					2.0.0
  * Requires at least:		5.5.0
- * Tested up to:			6.4
+ * Tested up to:			6.5
  * Requires PHP:			7.2
  * WC requires at least: 	5.2
- * WC tested up to: 		8.2
+ * WC tested up to: 		8.7
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -61,15 +61,29 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		// add our custom webhook topic
 		add_filter( 'woocommerce_webhook_topics',				array( $this, 'add_webhook_topic' ), 10, 1 );
 
-		// trigger our webhook from subscription hook(s)
-		add_action( 'woocommerce_subscription_status_updated',	array( $this, 'subscription_updated' ), 10, 3 );
+		// trigger our webhook from wc subscription hook
+		add_action( 'woocommerce_subscription_status_updated',	array( $this, 'subscription_updated_wc' ), 10, 3 );
+
+		// trigger our webhooks from sumo subscription hook(s)
+		add_action( 'sumosubscriptions_subscription_created',	function($sub_id)
+		{
+			remove_action( 'sumosubscriptions_active_subscription', array($this,'subscription_updated_sumo'), 20,1 );
+			$this->subscription_updated_sumo($sub_id);
+		}, 20, 1 );
+		add_action( 'sumosubscriptions_subscription_paused',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_subscription_resumed',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_subscription_cancelled',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_subscription_expired',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+
+		add_action( 'sumosubscriptions_active_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+//		add_action( 'sumosubscriptions_pause_subscription',		array( $this, 'subscription_updated_sumo' ), 20, 1 );
+//		add_action( 'sumosubscriptions_cancel_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 
 		// filter the webhook payload for ours and for order webhooks
 		add_filter( 'woocommerce_webhook_payload',				array( $this, 'get_webhook_payload' ), 10, 4 );
 
-		// get webhook delivery response
-		// $http_args, $response, $duration, $arg, $this->get_id() );
-		//add_action( 'woocommerce_webhook_delivery', 			array( $this, 'get_webhook_response' ), 10, 5 );
+		// get webhook delivery response - $http_args, $response, $duration, $arg, $this->get_id() );
+		add_action( 'woocommerce_webhook_delivery', 			array( $this, 'get_webhook_response' ), 10, 5 );
 	}
 
 	/**
@@ -208,7 +222,8 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 
 	/**
-	 * Add webhook topic to drop-down list
+	 * Add webhook topic to drop-down list.
+	 * Custom topics are prefixed with woocommerce_ or wc_ are valid.
 	 *
 	 * @param array $topics array of current topics
 	 * @return array $topics
@@ -217,14 +232,18 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	{
 		if ( function_exists('\wcs_get_subscription') )
 		{
-			$topics['action.wc_eacswregistry_subscription'] = '{eac}SoftwareRegistry Subscription updated';
+			$topics['action.wc_eacswregistry_subscription'] = '{eac}SoftwareRegistry WC Subscription';
+		}
+		if ( class_exists('\SUMOSubscriptions',false) )
+		{
+			$topics['action.wc_eacswregistry_sumosub'] = '{eac}SoftwareRegistry Sumo Subscription';
 		}
 		return $topics;
 	}
 
 
 	/**
-	 * subscription updated
+	 * subscription updated (wc)
 	 *
 	 * triggered by woocommerce_subscription_status_updated
 	 * triggers custom webhook wc_eacswregistry_subscription
@@ -234,9 +253,40 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 * @param string $oldStatus old status
 	 * @return void
 	 */
-	public function subscription_updated( $subscription, $newStatus=null, $oldStatus=null )
+	public function subscription_updated_wc( $subscription, $newStatus=null, $oldStatus=null )
 	{
-		do_action('wc_eacswregistry_subscription', $subscription->get_id() );
+		do_action('wc_eacswregistry_subscription', [$subscription->get_id(),current_action()] );
+	}
+
+
+	/**
+	 * subscription updated (sumo)
+	 *
+	 * triggered by ***
+	 * triggers custom webhook wc_eacswregistry_sumosub
+	 *
+	 * @param object $subscription SUMO_Subscription
+	 * @param string $sub_id subscription post id
+	 * @return void
+	 */
+	public function subscription_updated_sumo( $sub_id )
+	{
+		do_action('wc_eacswregistry_sumosub', [$sub_id,current_action()] );
+	}
+
+
+	/**
+	 * Get the webhook response
+	 *
+	 * @param array $http_args
+	 * @param array $response
+	 * @param float $duration
+	 * @param string $post_id
+	 * @param int $webhook_id
+	 */
+	public function get_webhook_response( $http_args, $response, $duration, $post_id, $webhook_id )
+	{
+		$this->logDebug([$response['response'],json_decode($response['body'])],__METHOD__.' '.current_action());
 	}
 
 
@@ -244,6 +294,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 * Get the payload data for our webhook
 	 *
 	 * WebHook topic header = 'X-Wc-Webhook-Topic: action.wc_eacswregistry_subscription',
+	 * WebHook topic header = 'X-Wc-Webhook-Topic: action.wc_eacswregistry_sumosub',
 	 *
 	 * @param array $payload ['action'=>,'arg'=>]
 	 * @param string $resource 'action', 'order'
@@ -255,71 +306,159 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	{
 		$webhook = wc_get_webhook( $webhook_id );
 
+		//$this->logDebug(func_get_args(),__METHOD__.' entry '.current_action());
+
 		// switch to the user who created the webhook
 		$current_user = get_current_user_id();
 		wp_set_current_user( $webhook->get_user_id() );
 
-		$sub_options = \get_option('eacSoftwareRegistry_subscription_options_'.$webhook_id,[]);
-
 		$version = str_replace( 'wp_api_', '', $webhook->get_api_version() );
 
-		if ( isset( $payload['action'] ) && $payload['action'] == 'wc_eacswregistry_subscription' && is_numeric($resource_id) )
-		// subscription update - get subscription order and overlay additional subscription data
+		/*
+		 * custom subscription actions: wc_eacswregistry_subscription, wc_eacswregistry_sumosub
+		 */
+		if ( $resource == 'action' && is_array($resource_id) )
 		{
-			$subscription = new \WC_Subscription($resource_id);
-			$payload = array_merge(
-				wc()->api->get_endpoint_data( "/wc/{$version}/orders/{$resource_id}" ),
-				$this->get_subscription_data($subscription)
-			);
-			$payload['related_orders'] 		= $this->get_related_orders($subscription);
-
+			list ($resource_id,$current_action) = $resource_id;
+			if ( $payload['action'] == 'wc_eacswregistry_subscription' )
+			// wc subscription update - get subscription order and overlay additional subscription data
+			{
+				$subscription = new \WC_Subscription($resource_id);
+				$payload = array_merge(
+					wc()->api->get_endpoint_data( "/wc/{$version}/orders/{$resource_id}" ),
+					$this->get_subscription_data_wc($subscription)
+				);
+				$payload['current_action'] 		= $current_action;
+				$payload['related_orders'] 		= $this->get_related_orders_wc($subscription);
+			}
+			else if ( $payload['action'] == 'wc_eacswregistry_sumosub' )
+			// sumo subscription update - get subscription order and overlay additional subscription data
+			{
+				$subscription = get_post($resource_id); //new \sumo_get_subscription($resource_id);
+				// initial order (created subscription)
+				$parent 	= get_post_meta( $subscription->ID, 'sumo_get_parent_order_id', true );
+				// last renewal order (or parent)
+				$renewal 	= get_post_meta( $subscription->ID, 'sumo_get_renewal_id', true ) ?: $parent;
+			//	$this->logDebug([$subscription,get_post_meta($resource_id),$parent,$renewal],__METHOD__.' sumo_get_subscription '.current_action());
+				$order		= wc()->api->get_endpoint_data( "/wc/{$version}/orders/{$renewal}" );
+				if (empty($order['parent_id'])) $order['parent_id'] = $order['id'];
+				$payload = array_merge(
+					$order,
+					$this->get_subscription_data_sumo($subscription,$renewal)
+				);
+				// trigger update (renew/revise) by setting post_id
+				if (!strpos($current_action,'_created')) {
+					$payload['post_id'] 		= $order['id'];
+				}
+				$payload['current_action'] 		= $current_action;
+				$payload['related_orders'] 		= $this->get_related_orders_sumo($subscription);
+			}
 		}
+		/*
+		 * Woo order hook(s): order.created, order.updated, order.deleted, order.restored
+		 */
 		else if ( $resource == 'order' && is_numeric($resource_id) )
-		// order update - get the order and append subscription(s)
 		{
-			if (in_array('NEWORDER',$sub_options) && wcs_order_contains_subscription($resource_id))
+			$sub_options = \get_option('eacSoftwareRegistry_subscription_options_'.$webhook_id,[]);
+			if (in_array('RENEWAL',$sub_options))		// append subscription to renewal order
 			{
-				$subscriptions = wcs_get_subscriptions_for_order($resource_id);
-			}
-			else if (in_array('RENEWAL',$sub_options) && wcs_order_contains_renewal($resource_id))
-			{
-				$subscriptions = wcs_get_subscriptions_for_renewal_order($resource_id);
-			}
-			if (isset($subscriptions))
-			{
-				$payload['subscriptions'] = array();
-				foreach ($subscriptions as $sub)
+				if (function_exists('\wcs_order_contains_renewal') && \wcs_order_contains_renewal($resource_id))
 				{
-					$subscription = $this->get_subscription_data($sub);
-					$payload['subscriptions'][ $sub->get_id() ] = array_merge(
-						wc()->api->get_endpoint_data( "/wc/{$version}/orders/{$sub->get_id()}" ),
-						$subscription
-					);
+					$payload['subscriptions'] 	= $this->get_wc_subscriptions( $resource_id, 'RENEWAL' );
+				}
+				else if (function_exists('\sumosubs_is_renewal_order') && \sumosubs_is_renewal_order($resource_id))
+				{
+					$payload['post_id'] 		= $payload['id'];
+					$payload['created_via'] 	= 'subscription';
+					$payload['subscriptions'] 	= $this->get_sumo_subscriptions( $resource_id, 'RENEWAL');
 				}
 			}
-			if (in_array('METADATA',$sub_options))
+			else if (in_array('NEWORDER',$sub_options))			// append subscription to new order
 			{
-				$payload['product_meta']		= $this->get_product_meta(new \WC_Order($resource_id));
+				if (function_exists('\wcs_order_contains_subscription') && \wcs_order_contains_subscription($resource_id))
+				{
+					$payload['subscriptions'] 	= $this->get_wc_subscriptions( $resource_id, 'NEWORDER' );
+				}
+				else if (function_exists('\sumo_order_contains_subscription') && \sumo_order_contains_subscription($resource_id))
+				{
+					unset($payload['post_id']);
+					$payload['subscriptions'] 	= $this->get_sumo_subscriptions( $resource_id, 'NEWORDER');
+				}
+			}
+			if (in_array('METADATA',$sub_options))			// append order productt(s) meta-data
+			{
+				$payload['product_meta']		= $this->get_product_meta(wc_get_order($resource_id));
 			}
 		}
 
 		// Restore the current user.
 		wp_set_current_user( $current_user );
 
+		$this->logDebug($payload,__METHOD__.' '.$resource.' '.current_action());
 		return $payload;
 	}
 
 
 	/**
-	 * Get subscription data to add to the payload
+	 * Get subscription records  (wc)
+	 *
+	 * @param array $resource_id order id
+	 * @param string $type NEWORDER | RENEWAL
+	 * @return array subscription records array
+	 */
+	private function get_wc_subscriptions( $resource_id, $type )
+	{
+		$subs = ($type == 'NEWORDER')
+			? \wcs_get_subscriptions_for_order($resource_id)
+			: \wcs_get_subscriptions_for_renewal_order($resource_id);
+		$payload = array();
+		foreach ($subs as $sub)
+		{
+			$payload[ $sub->get_id() ] = array_merge(
+				wc()->api->get_endpoint_data( "/wc/{$version}/orders/{$sub->get_id()}" ),
+				$this->get_subscription_data_wc($sub)
+			);
+		}
+		return $payload;
+	}
+
+
+	/**
+	 * Get subscription records  (sumo)
+	 *
+	 * @param array $resource_id order id
+	 * @param string $type NEWORDER | RENEWAL
+	 * @return array subscription records array
+	 */
+	private function get_sumo_subscriptions( $resource_id, $type )
+	{
+		$order = wc_get_order($resource_id);
+		$payload = array();
+		$related = $order->get_meta('sumo_subsc_get_available_postids_from_parent_order');
+		if (!empty($related))
+		{
+			foreach ($related as $id) {
+				$sub = get_post($id);
+				$payload[$id] = array_merge(
+					(array)$sub,
+					$this->get_subscription_data_sumo($sub,$order)
+				);
+			}
+		}
+		return $payload;
+	}
+
+
+	/**
+	 * Get subscription data to add to the payload (wc)
 	 *
 	 * @param array $subscription WC_Subscription
 	 * @return array subscription data array
 	 */
-	private function get_subscription_data( $subscription )
+	private function get_subscription_data_wc( $subscription )
 	{
 		return	[	// dates are UTC/GMT
-				//	'created_via' 				=> 'subscription',
+					'status'					=> strtolower($subscription->get_status()),
 					'date_created'				=> $this->dateFormat( $subscription->get_date('date_created') ),
 					'date_modified'				=> $this->dateFormat( $subscription->get_date('date_modified') ),
 					'date_paid'					=> $this->dateFormat( $subscription->get_date('date_paid') ),
@@ -343,20 +482,94 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 
 	/**
+	 * Get subscription data to add to the payload (sumo)
+	 *
+	 * @param array $subscription SUMO subscription
+	 * @param array $order WC order
+	 * @return array subscription data array
+	 */
+	private function get_subscription_data_sumo( $subscription, $order )
+	{
+		$order 		= wc_get_order($order);
+		$parent 	= $order->get_parent_id();
+		$parent 	= ($parent) ? wc_get_order($parent) : $order;
+		$plan 		= \sumo_get_subscription_plan($subscription->ID);
+		$period 	= $plan['subscription_duration'];
+		switch ($period) {
+			case 'D':
+				$period = 'day';
+				break;
+			case 'W':
+				$period = 'week';
+				break;
+			case 'M':
+				$period = 'month';
+				break;
+			case 'Y':
+				$period = 'year';
+				break;
+		}
+		$interval 	= $plan['subscription_duration_value'];
+
+
+		$next 		= get_post_meta($subscription->ID,'sumo_get_next_payment_date',true);
+		$end 		= get_post_meta($subscription->ID,'sumo_get_sub_end_date',true) ?: $next;
+		$start 		= get_post_meta($subscription->ID,'sumo_get_sub_start_date',true);
+		if (empty($start)) {
+			try {
+				$start 	= new \DateTimeImmutable($end);
+				$start 	= $start->modify("-{$interval} {$period}")->format('Y-m-d\TH:i:s');
+			} catch (\Throwable $e) {$end = $start = '';} // when paused
+		}
+		$status 	= strtolower(get_post_meta($subscription->ID,'sumo_get_status',true));
+		$cancelled	= ($status == 'cancelled') ? $end : '';
+		return	[	// dates are UTC/GMT
+					'id'						=> $subscription->ID, // override order id
+					'status'					=> $status,
+					'date_created'				=> $this->dateFormat( $parent->get_date_created() ),
+					'date_modified'				=> $this->dateFormat( $order->get_date_modified() ),
+					'date_paid'					=> $this->dateFormat( get_post_meta($subscription->ID,'sumo_get_last_payment_date',true) ),
+					'date_completed'			=> $this->dateFormat( $order->get_date_completed() ),
+					'last_order_id'				=> $order->get_id(),
+					'last_order_date_created'	=> $this->dateFormat( $order->get_date_created() ),
+					'last_order_date_paid'		=> $this->dateFormat( $order->get_date_paid() ),
+					'last_order_date_completed'	=> $this->dateFormat( $order->get_date_completed() ),
+					'schedule_trial_end' 		=> $this->dateFormat( get_post_meta($subscription->ID,'sumo_get_trial_end_date',true) ),
+					'schedule_start' 			=> $this->dateFormat( $start ),
+					'schedule_end' 				=> $this->dateFormat( $end ),
+					'schedule_cancelled' 		=> $this->dateFormat( $cancelled ),
+					'schedule_next_payment' 	=> $this->dateFormat( $next ),
+					//	'schedule_payment_retry' 	=> $this->dateFormat( get_post_meta($subscription->ID,'schedule_payment_retry') ),
+					'billing_period'			=> $period,
+					'billing_interval'			=> $interval,
+					'sign_up_fee'				=> $plan['signup_fee'],
+					'product_meta'				=> $this->get_product_meta($order,[ $plan['subscription_product_id'] ]),
+		];
+	}
+
+
+	/**
 	 * Get product meta data
 	 *
 	 * @param object $order WC_Subscription or WC_Order
+	 * @param object $includeonly these item(s)
 	 * @return array [id => type]
 	 */
-	private function get_product_meta( $order )
+	private function get_product_meta( $order, $include=null )
 	{
 		$result = array();
 		$items = $order->get_items();
 		foreach ($items as $item)
 		{
-			$meta_data = $attributes = array();
+			if (is_array($include))
+			{
+				if (!in_array($item->get_product_id(),$include) && !in_array($item->get_variation_id(),$include)) continue;
+			}
 
-			$product = wc_get_product( $item->get_product_id() );
+			$meta_data = $attributes = $categories = array();
+
+			$product 	= wc_get_product( $item->get_product_id() );
+			$product_id = $product->get_id();
 
 			foreach ($product->get_meta_data() as $meta) {
 				$meta_data[ $meta->key ] = $meta->value;
@@ -364,9 +577,13 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 			$attributes	= $product->get_attributes();
 
-			if ($item->get_variation_id())
+			if ($categories = get_the_terms( $product_id, 'product_cat' )) {
+				$categories = array_combine(wp_list_pluck( $categories, 'slug' ),wp_list_pluck( $categories, 'name' ));
+			}
+
+			if ($variation_id = $item->get_variation_id())
 			{
-				$product = wc_get_product( $item->get_variation_id() );
+				$product = wc_get_product( $variation_id );
 				foreach ($product->get_meta_data() as $meta) {
 					if (!empty($meta->value)) {
 						$meta_data[ $meta->key ] = $meta->value;
@@ -374,13 +591,19 @@ class eacSoftwareRegistry_Subscription_Webhooks
 				}
 
 				$attributes	= array_merge($attributes,$product->get_attributes());
-			}
 
-			$product_id 	= $product->get_id();
+				if ($varcat = get_the_terms( $variation_id, 'product_cat' )) {
+					$varcat = array_combine(wp_list_pluck( $varcat, 'slug' ),wp_list_pluck( $varcat, 'name' ));
+					$categories = array_merge($categories,$varcat);
+				}
+			}
 
 			// strip "pa_" prefix (product attribute)
 			$_attributes = [];
 			foreach ($attributes as $key => $value) {
+				if (is_a($value,'WC_Product_Attribute')) {
+					$value = $value->get_options()[0] ?? null;
+				}
 				$_attributes[ preg_replace('/^pa_(.+)/','$1',$key) ] = $value;
 			}
 
@@ -391,6 +614,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 				'sku'		=> $product->get_sku(),
 				'attributes'=> $_attributes,
 				'meta_data' => array_filter($meta_data, function($key){return ($key[0] != '_');}, ARRAY_FILTER_USE_KEY),
+				'categories'=> $categories,
 			);
 		}
 
@@ -399,12 +623,12 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 
 	/**
-	 * Get related orders and order type
+	 * Get related orders and order type (wc)
 	 *
 	 * @param array $subscription WC_Subscription
 	 * @return array [id => type]
 	 */
-	private function get_related_orders( $subscription )
+	private function get_related_orders_wc( $subscription )
 	{
 		$relatedOrders = [];
 		foreach ( ['parent','renewal','resubscribe','switch'] as $type )
@@ -420,6 +644,23 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 
 	/**
+	 * Get related orders and order type (sumo)
+	 *
+	 * @param array $subscription sumo subscription
+	 * @return array [id => type]
+	 */
+	private function get_related_orders_sumo( $subscription )
+	{
+		$relatedOrders 	= get_post_meta( $subscription->ID, 'sumo_get_every_renewal_ids', true );
+		$relatedOrders 	= (empty($relatedOrders)) ? [] : array_fill_keys(maybe_unserialize($relatedOrders), 'renewal');
+		$relatedOrders[ get_post_meta( $subscription->ID, 'sumo_get_parent_order_id', true ) ] = 'parent';
+
+		krsort($relatedOrders,SORT_NUMERIC);
+		return $relatedOrders;
+	}
+
+
+	/**
 	 * Format date to ISO 8601 'Y-m-d\TH:i:s'
 	 *
 	 * @param string $date
@@ -427,7 +668,35 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 */
 	private function dateFormat( $date )
 	{
-		return (!empty($date)) ? date('Y-m-d\TH:i:s',strtotime($date)) : $date;
+		if (empty($date)) return $date;
+
+		if (is_a($date,'WC_DateTime'))
+		{
+			$date->setTimezone(new \DateTimeZone('UTC'));
+			return $date->date('Y-m-d\TH:i:s');
+		}
+
+		try {
+			$date 	= new \DateTimeImmutable($date);
+			$date 	= $date->format('Y-m-d\TH:i:s');
+		} catch (\Throwable $e) {$date = '';}
+
+		return $date;
+	}
+
+
+	/**
+	 * logging via eacDoojigger
+	 *
+	 * @param mixed $data
+	 * @param string $label
+	 */
+	private function logDebug( $data, $label )
+	{
+		if (function_exists('\eacDoojigger'))
+		{
+			\eacDoojigger()->logDebug($data,$label);
+		}
 	}
 }
 new \EarthAsylumConsulting\eacSoftwareRegistry_Subscription_Webhooks();
