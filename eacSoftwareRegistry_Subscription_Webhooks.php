@@ -17,7 +17,7 @@
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.0.0
+ * Version:					2.0.1
  * Requires at least:		5.5.0
  * Tested up to:			6.5
  * Requires PHP:			7.2
@@ -70,14 +70,18 @@ class eacSoftwareRegistry_Subscription_Webhooks
 			remove_action( 'sumosubscriptions_active_subscription', array($this,'subscription_updated_sumo'), 20,1 );
 			$this->subscription_updated_sumo($sub_id);
 		}, 20, 1 );
-		add_action( 'sumosubscriptions_subscription_paused',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
-		add_action( 'sumosubscriptions_subscription_resumed',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
-		add_action( 'sumosubscriptions_subscription_cancelled',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_subscription_resumed',	function($sub_id)
+		{
+			remove_action( 'sumosubscriptions_active_subscription', array($this,'subscription_updated_sumo'), 20,1 );
+			$this->subscription_updated_sumo($sub_id);
+		}, 20, 1 );
+//		add_action( 'sumosubscriptions_subscription_paused',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+//		add_action( 'sumosubscriptions_subscription_cancelled',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 		add_action( 'sumosubscriptions_subscription_expired',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 
 		add_action( 'sumosubscriptions_active_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
-//		add_action( 'sumosubscriptions_pause_subscription',		array( $this, 'subscription_updated_sumo' ), 20, 1 );
-//		add_action( 'sumosubscriptions_cancel_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_pause_subscription',		array( $this, 'subscription_updated_sumo' ), 20, 1 );
+		add_action( 'sumosubscriptions_cancel_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 
 		// filter the webhook payload for ours and for order webhooks
 		add_filter( 'woocommerce_webhook_payload',				array( $this, 'get_webhook_payload' ), 10, 4 );
