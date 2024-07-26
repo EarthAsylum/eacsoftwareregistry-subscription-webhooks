@@ -1,17 +1,17 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.0.1
-Last Updated:           13-Apr-2024
-Requires at least:      5.5.0
-Tested up to:           6.5
-WC requires at least:   5.2
-WC tested up to:        8.7
-Requires PHP:           7.2
+Stable tag:             2.1.0
+Last Updated:           25-Jul-2024
+Requires at least:      5.8.0
+Tested up to:           6.6
+WC requires at least:   7.0
+WC tested up to:        9.2
+Requires PHP:           7.4
 Contributors:           kevinburkholder
 License:                GPLv3 or later
 License URI:            https://www.gnu.org/licenses/gpl.html
-Tags:                   software registration, WooCommerce, WooCommerce Subscriptions, Webhooks, sumo subscriptions, subscriptions, software registry, software license, {eac}SoftwareRegistry
+Tags:                   WooCommerce Subscriptions, WooCommerce Webhooks, SUMO subscriptions, subscriptions, {eac}SoftwareRegistry
 WordPress URI:          https://wordpress.org/plugins/eacsoftwareregistry-subscription-webhooks/
 Github URI:             https://github.com/EarthAsylum/eacsoftwareregistry-subscription-webhooks/
 
@@ -186,6 +186,15 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.1.0 – July 25, 2024 =
+
++   Compatible with WooCommerce v9+ and HPOS (High Performance Order Storage).
++   Supports new WooCommerce RestAPI as well as Legacy API (if enabled).
++   Compatible with WordPress 6.6.
++   Get available post ids from parent order.
++   Updated minimum requirements: WP 5.8, WC 7.0, PHP 7.4.
++   Updated translator name (but still no translations).
 
 = Version 2.0.1 – April 13, 2024 =
 

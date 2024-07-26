@@ -7,17 +7,17 @@
 
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.0.1  
-Last Updated:           13-Apr-2024  
-Requires at least:      5.5.0  
-Tested up to:           6.5  
-WC requires at least:   5.2  
-WC tested up to:        8.7  
-Requires PHP:           7.2  
+Stable tag:             2.1.0  
+Last Updated:           25-Jul-2024  
+Requires at least:      5.8.0  
+Tested up to:           6.6  
+WC requires at least:   7.0  
+WC tested up to:        9.2  
+Requires PHP:           7.4  
 Contributors:           [kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:                GPLv3 or later  
 License URI:            https://www.gnu.org/licenses/gpl.html  
-Tags:                   software registration, WooCommerce, WooCommerce Subscriptions, Webhooks, sumo subscriptions, subscriptions, software registry, software license, {eac}SoftwareRegistry  
+Tags:                   WooCommerce Subscriptions, WooCommerce Webhooks, SUMO subscriptions, subscriptions, {eac}SoftwareRegistry  
 WordPress URI:          https://wordpress.org/plugins/eacsoftwareregistry-subscription-webhooks/  
 Github URI:             https://github.com/EarthAsylum/eacsoftwareregistry-subscription-webhooks/  
 
