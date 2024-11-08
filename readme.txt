@@ -1,12 +1,12 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.1.0
-Last Updated:           25-Jul-2024
-Requires at least:      5.8.0
-Tested up to:           6.6
+Stable tag:             2.1.1
+Last Updated:           08-Nov-2024
+Requires at least:      5.8
+Tested up to:           6.7
 WC requires at least:   7.0
-WC tested up to:        9.2
+WC tested up to:        9.3
 Requires PHP:           7.4
 Contributors:           kevinburkholder
 License:                GPLv3 or later
@@ -186,6 +186,11 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.1.1 – November 8, 2024 =
+
++   Fixed warning in plugin_action_links when pluginData does not include slug.
++   Compatible with WordPress 6.7 and WooCommerce 9.3.
 
 = Version 2.1.0 – July 25, 2024 =
 

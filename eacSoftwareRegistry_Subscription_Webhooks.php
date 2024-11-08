@@ -17,12 +17,12 @@
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.0
+ * Version:					2.1.1
  * Requires at least:		5.8.0
- * Tested up to:			6.6
+ * Tested up to:			6.7
  * Requires PHP:			7.4
  * WC requires at least: 	7.0
- * WC tested up to: 		9.1
+ * WC tested up to: 		9.3
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -126,7 +126,8 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 */
 	public function plugin_action_links( $pluginLinks, $pluginFile, $pluginData )
 	{
-		if (empty($pluginData)) return $pluginLinks;
+		if (empty($pluginData) || empty($pluginData['Name'])) return $pluginLinks;
+		$pluginData['slug'] = dirname(plugin_basename($pluginFile));
 
 		$query = array(
 			'page'    => 'wc-settings',
