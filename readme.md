@@ -7,12 +7,13 @@
 
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.1.1  
-Last Updated:           08-Nov-2024  
+Stable tag:             2.1.2  
+Last Updated:           23-Nov-2024  
 Requires at least:      5.8  
 Tested up to:           6.7  
+Requires Plugins:       woocommerce  
 WC requires at least:   7.0  
-WC tested up to:        9.3  
+WC tested up to:        9.4  
 Requires PHP:           7.4  
 Contributors:           [kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:                GPLv3 or later  
@@ -37,9 +38,9 @@ Github URI:             https://github.com/EarthAsylum/eacsoftwareregistry-subsc
 
 +   Works with WooCommerce Subscriptions - and - SUMO Subscriptions.
 
-When WooCommerce creates an order, the order is stored as a post with type set to "*shop_order*". When the order is for a subscription, a related order is stored as a post with type set to "*shop_subscription*". When a subscription is renewed, a new "*shop_order*" is created related back to the original "*shop_subscription*" order.
+When WooCommerce creates an order, the order is stored with type set to "*shop_order*". When the order is for a subscription, a related order is stored with type set to "*shop_subscription*". When a subscription is renewed, a new "*shop_order*" is created related back to the original "*shop_subscription*" order.
 
-When subscriptions (*shop_subscription*) are passed through the *"{eac}SoftwareRegistry Subscription updated"* webhook, additional subscription data and related order numbers are added to the subscription order record being passed.
+When subscriptions (*shop_subscription*) are passed through the *"{eac}SoftwareRegistry WC Subscription"* webhook, additional subscription data and related order numbers are added to the subscription order record being passed.
 
 When orders (*shop_order*) are passed through the WooCommerce *Order created*, *Order updated*, and *Order restored* webhooks, this plugin will append any related *shop_subscription* orders with the additional subscription data and related order numbers.
 
@@ -54,7 +55,7 @@ With version 2+, *SUMO Subscriptions* is also supported in nearly the same way a
 
 #### Subscriptions
 
-To create a webhook for subscription updates, choose *"{eac}SoftwareRegistry Subscription updated"*, when using Woo Subscriptions, or *"{eac}SoftwareRegistry Sumo Subscription"*, when using SUMO Subscriptions, for the topic on the *Webhook data* screen.
+To create a webhook for subscription updates, choose *"{eac}SoftwareRegistry WC Subscription"*, when using Woo Subscriptions, or *"{eac}SoftwareRegistry Sumo Subscription"*, when using SUMO Subscriptions, for the topic on the *Webhook data* screen.
 
 Whenever a subscription is updated, the subscription data will be sent to the *Delivery URL* specified in the Webhook.
 
@@ -117,7 +118,7 @@ The pseudo subscription order is built by taking the SUMO subscription post reco
 
 You must have the [{eac}SoftwareRegistry WebHooks for WooCommerce](https://swregistry.earthasylum.com/webhooks-for-woocommerce/) extension enabled on your Software Registration server.
 
-When creating a subscription webhook, the *Delivery URL* for *"{eac}SoftwareRegistry Subscription updated"* and *"{eac}SoftwareRegistry Sumo Subscription"* is:
+When creating a subscription webhook, the *Delivery URL* for *"{eac}SoftwareRegistry WC Subscription"* and *"{eac}SoftwareRegistry Sumo Subscription"* is:
 `https://{your_registration_server}.com/wp-json/softwareregistry/v1/wc-subscription`
 
 When creating order webhooks, the *Delivery URL* for *Order created*, *Order updated*, *Order deleted* and *Order restored* is:

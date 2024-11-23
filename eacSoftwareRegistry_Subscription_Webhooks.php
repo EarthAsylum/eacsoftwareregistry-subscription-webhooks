@@ -12,17 +12,17 @@
  * @package		{eac}SoftwareRegistry\Webhook
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
  *
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.1
- * Requires at least:		5.8.0
+ * Version:					2.1.2
+ * Requires at least:		5.8
  * Tested up to:			6.7
  * Requires PHP:			7.4
+ * Requires Plugins: 		woocommerce
  * WC requires at least: 	7.0
- * WC tested up to: 		9.3
+ * WC tested up to: 		9.4
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -101,6 +101,13 @@ class eacSoftwareRegistry_Subscription_Webhooks
 				remove_action( 'sumosubscriptions_active_subscription', array($this,'subscription_updated_sumo'), 20,1 );
 				$this->subscription_updated_sumo($sub_id);
 			}, 20, 1 );
+			add_action( 'sumosubscriptions_subscription_is_switched', function($order, $subscription, $switched_subscription_product)
+			{
+				// new order, new subscription replaces old order/subscription
+				remove_action( 'sumosubscriptions_active_subscription', array($this,'subscription_updated_sumo'), 20,1 );
+				$switched = get_post_meta( $subscription->get_id(), 'sumo_previous_parent_order', true );
+				$this->subscription_updated_sumo($subscription->get_id(),$switched);
+			},10,3 );
 		//	add_action( 'sumosubscriptions_subscription_paused',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 		//	add_action( 'sumosubscriptions_subscription_cancelled',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 			add_action( 'sumosubscriptions_subscription_expired',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
@@ -293,7 +300,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	public function subscription_updated_wc( $subscription, $newStatus=null, $oldStatus=null )
 	{
 		$this->logDebug($subscription,__METHOD__.' '.current_action());
-		do_action('wc_eacswregistry_subscription', [$subscription->get_id(),current_action()] );
+		do_action('wc_eacswregistry_subscription', [$subscription->get_id(),current_action(),0] );
 	}
 
 
@@ -306,10 +313,10 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 * @param string $sub_id subscription post id
 	 * @return void
 	 */
-	public function subscription_updated_sumo( $sub_id )
+	public function subscription_updated_sumo( $sub_id, $switched=0 )
 	{
 		$this->logDebug($sub_id,__METHOD__.' '.current_action());
-		do_action('wc_eacswregistry_sumosub', [$sub_id,current_action()] );
+		do_action('wc_eacswregistry_sumosub', [$sub_id,current_action(),$switched] );
 	}
 
 
@@ -355,7 +362,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		 */
 		if ( $resource == 'action' && is_array($resource_id) )
 		{
-			list ($resource_id,$current_action) = $resource_id;
+			list ($resource_id,$current_action,$switched) = $resource_id;
 			if ( $payload['action'] == 'wc_eacswregistry_subscription' )
 			// wc subscription update - get subscription order and overlay additional subscription data
 			{
@@ -370,11 +377,11 @@ class eacSoftwareRegistry_Subscription_Webhooks
 			else if ( $payload['action'] == 'wc_eacswregistry_sumosub' )
 			// sumo subscription update - get subscription order and overlay additional subscription data
 			{
-				$subscription = get_post($resource_id); //new \sumo_get_subscription($resource_id);
+				$subscription 	= get_post($resource_id); //new \sumo_get_subscription($resource_id);
 				// initial order (created subscription)
-				$parent 	= get_post_meta( $subscription->ID, 'sumo_get_parent_order_id', true );
+				$parent 		= get_post_meta( $subscription->ID, 'sumo_get_parent_order_id', true );
 				// last renewal order (or parent)
-				$renewal 	= get_post_meta( $subscription->ID, 'sumo_get_renewal_id', true ) ?: $parent;
+				$renewal 		= get_post_meta( $subscription->ID, 'sumo_get_renewal_id', true ) ?: $parent;
 				// endpoint renewal order
 				$order = $this->get_endpoint_data( $version, 'order', $renewal );
 				if (empty($order['parent_id'])) $order['parent_id'] = $order['id'];
@@ -388,6 +395,11 @@ class eacSoftwareRegistry_Subscription_Webhooks
 				}
 				$payload['current_action'] 		= $current_action;
 				$payload['related_orders'] 		= $this->get_related_orders_sumo($subscription);
+				// only pass switched if the subscription was switched to a new original order
+				if ($switched) {
+					$payload['related_orders'][$switched] = 'switch';
+					$payload['switched_order'] 	= $switched;
+				}
 			}
 		}
 		/*
