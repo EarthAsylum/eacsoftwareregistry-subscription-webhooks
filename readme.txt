@@ -1,13 +1,13 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.1.2
-Last Updated:           23-Nov-2024
+Stable tag:             2.1.3
+Last Updated:           15-Apr-2025
 Requires at least:      5.8
-Tested up to:           6.7
+Tested up to:           6.8
 Requires Plugins:       woocommerce
 WC requires at least:   7.0
-WC tested up to:        9.4
+WC tested up to:        9.8
 Requires PHP:           7.4
 Contributors:           kevinburkholder
 License:                GPLv3 or later
@@ -177,7 +177,7 @@ Requires [WooCommerce](https://woocommerce.com/) and either [WooCommerce Payment
 
 == Copyright ==
 
-= Copyright © 2024, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
+= Copyright © 2025, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -187,6 +187,12 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.1.3 – April 15, 2025 =
+
++   Compatible with WordPress 6.8, WooCommerce 9.8, and Sumo Subscriptions 16.1.
++   Test for latest REST API over legacy API.
+    +   Prevent "deprecated" notice triggered by ActionScheduler.
 
 = Version 2.1.2 – November 23, 2024 =
 

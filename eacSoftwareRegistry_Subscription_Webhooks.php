@@ -11,18 +11,18 @@
  * @category	WordPress Plugin
  * @package		{eac}SoftwareRegistry\Webhook
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
  *
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.2
+ * Version:					2.1.3
  * Requires at least:		5.8
- * Tested up to:			6.7
+ * Tested up to:			6.8
  * Requires PHP:			7.4
  * Requires Plugins: 		woocommerce
  * WC requires at least: 	7.0
- * WC tested up to: 		9.4
+ * WC tested up to: 		9.8
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -457,17 +457,21 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 */
 	private function get_endpoint_data( $version, $resource, $resource_id )
 	{
+		$RestApiUtil = "\Automattic\WooCommerce\Utilities\RestApiUtil";
+		if (class_exists($RestApiUtil))
+		{
+			try {
+				$RestApiUtil = new $RestApiUtil();
+				return $RestApiUtil->get_endpoint_data("/wc/{$version}/{$resource}s/{$resource_id}" );
+			} catch (\Throwable $e) {$this->logDebug($e);}
+		}
+
 		if ( ! is_null( wc()->api ) )		// legacy api
 		{
 			try {
 				return wc()->api->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 			} catch (\Throwable $e) {$this->logDebug($e);}
 		}
-
-		try {
-			$RestApiUtil = new \Automattic\WooCommerce\Utilities\RestApiUtil();
-			return $RestApiUtil->get_endpoint_data("/wc/{$version}/{$resource}s/{$resource_id}" );
-		} catch (\Throwable $e) {$this->logDebug($e);}
 	}
 
 
