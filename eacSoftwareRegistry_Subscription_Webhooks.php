@@ -16,7 +16,7 @@
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.3
+ * Version:					2.1.4
  * Requires at least:		5.8
  * Tested up to:			6.8
  * Requires PHP:			7.4
@@ -37,6 +37,11 @@ namespace EarthAsylumConsulting;
 class eacSoftwareRegistry_Subscription_Webhooks
 {
 	/**
+	 * @var string default verion
+	 */
+	private $debugging_enabled	= true;
+
+	/**
 	 * constructor method
 	 *
 	 * Add filters and actions for our custom webhook
@@ -53,7 +58,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 			}
 		});
 
-		if (is_admin())
+		add_action('admin_init', function()
 		{
 		 	// on plugin_action_links_ filter, add 'Settings' link
 	 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ),
@@ -64,7 +69,12 @@ class eacSoftwareRegistry_Subscription_Webhooks
 
 			// save our order webhook options
 			add_action( 'woocommerce_webhook_options_save',	array( $this, 'save_webhook_options' ));
-		}
+		});
+
+		add_action('init', function()
+		{
+			$this->debugging_enabled = apply_filters('subscription_webhooks_debugging',$this->debugging_enabled);
+		});
 
 		add_action( 'plugins_loaded', 						array( $this, 'set_actions_and_filters' ) );
 
@@ -117,7 +127,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 			add_action( 'sumosubscriptions_cancel_subscription',	array( $this, 'subscription_updated_sumo' ), 20, 1 );
 		}
 
-		// filter the webhook payload for our's and for order webhooks
+		// filter the webhook payload for our's and for any other order webhooks
 		add_filter( 'woocommerce_webhook_payload',				array( $this, 'get_webhook_payload' ), 10, 4 );
 
 		// get webhook delivery response - $http_args, $response, $duration, $arg, $this->get_id() );
@@ -196,13 +206,14 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		]
 		?>
 		<div id="webhook-subscription-options" style="display: none;"">
-		<h4><?php esc_html_e( '{eac}SoftwareRegistry Subscription WebHooks', 'woocommerce' ); ?></h4>
+		<!-- <h4><?php esc_html_e( '{eac}SoftwareRegistry Subscription WebHooks', 'woocommerce' ); ?></h4> -->
 		<table class="form-table">
 			<tbody>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
 						<label for="eacSoftwareRegistry_subscription_options">
-							<?php esc_html_e( 'Order Options', 'eacsoftwareregistry-subscription-webhooks' ); ?>
+							<abbr title='<?php esc_html_e( 'Provided by {eac}SoftwareRegistry Subscription WebHooks', 'eacsoftwareregistry-subscription-webhooks' ); ?>'>
+							<?php esc_html_e( 'Order Options', 'eacsoftwareregistry-subscription-webhooks' ); ?></abbr>
 							<?php echo wc_help_tip( __( 'Append subscription record(s) to orders with related subscriptions. Append custom fields and attributes from products ordered to order records;', 'eacsoftwareregistry-subscription-webhooks' ) ); ?>
 						</label>
 					</th>
@@ -442,7 +453,14 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		// Restore the current user.
 		wp_set_current_user( $current_user );
 
-		$this->logDebug($payload,__METHOD__.' '.$resource.' '.current_action());
+		$this->logDebug(
+			[
+				'resource' 		=> $resource,
+				'resource id' 	=> $resource_id,
+				'Webhook id' 	=> $webhook_id,
+			//	'payload' 		=> $payload
+			],
+			__METHOD__.' '.$resource.' '.current_action());
 		return $payload;
 	}
 
@@ -771,9 +789,9 @@ class eacSoftwareRegistry_Subscription_Webhooks
 	 */
 	private function logDebug( $data, $label=null )
 	{
-		if (function_exists('\eacDoojigger'))
+		if ($this->debugging_enabled)
 		{
-			\eacDoojigger()->logDebug($data,$label);
+			do_action('eacDoojigger_log_debug',$data,$label);
 		}
 	}
 }

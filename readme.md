@@ -7,8 +7,8 @@
 
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.1.3  
-Last Updated:           15-Apr-2025  
+Stable tag:             2.1.4  
+Last Updated:           29-Apr-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires Plugins:       woocommerce  
