@@ -231,7 +231,7 @@ You should receive a copy of the GNU General Public License along with this prog
 
 = Version 2.0.0 – April 4, 2024 =
 
-+   Supportes SUMO Subscriptions.
++   Supports SUMO Subscriptions.
 +   Added 'current_action' to the webhook data.
 +   Added 'categories' to product_meta.
 +   Compatible with WordPress 6.5+ and WooCommerce 8.7+
