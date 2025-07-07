@@ -1,13 +1,13 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.1.4
-Last Updated:           29-Apr-2025
+Stable tag:             2.1.5
+Last Updated:           07-Jul-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires Plugins:       woocommerce
-WC requires at least:   7.0
-WC tested up to:        9.8
+WC requires at least:   8.0
+WC tested up to:        9.9
 Requires PHP:           7.4
 Contributors:           kevinburkholder
 License:                GPLv3 or later
@@ -187,6 +187,11 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.1.5 – July 7, 2025 =
+
++   Rework logic to fix potential for updated original order not including subscription when newer orders exist.
++   Compatible with WooCommerce 9.8, and Sumo Subscriptions 17.0.
 
 = Version 2.1.4 – April 29, 2025 =
 

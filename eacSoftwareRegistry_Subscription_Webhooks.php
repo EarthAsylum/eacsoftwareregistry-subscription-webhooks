@@ -16,13 +16,13 @@
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.4
+ * Version:					2.1.5
  * Requires at least:		5.8
  * Tested up to:			6.8
  * Requires PHP:			7.4
  * Requires Plugins: 		woocommerce
- * WC requires at least: 	7.0
- * WC tested up to: 		9.8
+ * WC requires at least: 	8.0
+ * WC tested up to: 		9.9
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -419,26 +419,36 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		else if ( $resource == 'order' && is_numeric($resource_id) )
 		{
 			$sub_options = \get_option('eacSoftwareRegistry_subscription_options_'.$webhook_id,[]);
-			if (in_array('RENEWAL',$sub_options))			// append subscription to renewal order
+			// Woo Subscription renewal
+			if (function_exists('\wcs_order_contains_renewal') && \wcs_order_contains_renewal($resource_id))
 			{
-				if (function_exists('\wcs_order_contains_renewal') && \wcs_order_contains_renewal($resource_id))
+				if (in_array('RENEWAL',$sub_options))			// append subscription to renewal order
 				{
 					$payload['subscriptions'] 	= $this->get_wc_subscriptions( $resource_id, 'RENEWAL' );
 				}
-				else if (function_exists('\sumosubs_is_renewal_order') && \sumosubs_is_renewal_order($resource_id))
+			}
+			// Sumo Subscription renewal
+			else if (function_exists('\sumosubs_is_renewal_order') && \sumosubs_is_renewal_order($resource_id))
+			{
+				if (in_array('RENEWAL',$sub_options))			// append subscription to renewal order
 				{
 					$payload['post_id'] 		= $payload['id'];
 					$payload['created_via'] 	= 'subscription';
 					$payload['subscriptions'] 	= $this->get_sumo_subscriptions( $resource_id, 'RENEWAL');
 				}
 			}
-			else if (in_array('NEWORDER',$sub_options))		// append subscription to new order
+			// Woo Subscription new
+			else if (function_exists('\wcs_order_contains_subscription') && \wcs_order_contains_subscription($resource_id))
 			{
-				if (function_exists('\wcs_order_contains_subscription') && \wcs_order_contains_subscription($resource_id))
+				if (in_array('NEWORDER',$sub_options))			// append subscription to new order
 				{
 					$payload['subscriptions'] 	= $this->get_wc_subscriptions( $resource_id, 'NEWORDER' );
 				}
-				else if (function_exists('\sumo_order_contains_subscription') && \sumo_order_contains_subscription($resource_id))
+			}
+			// Sumo Subscription new
+			else if (function_exists('\sumo_order_contains_subscription') && \sumo_order_contains_subscription($resource_id))
+			{
+				if (in_array('NEWORDER',$sub_options))			// append subscription to new order
 				{
 					unset($payload['post_id']);
 					$payload['subscriptions'] 	= $this->get_sumo_subscriptions( $resource_id, 'NEWORDER');

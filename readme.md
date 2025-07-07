@@ -1,19 +1,18 @@
 ## {eac}SoftwareRegistry Subscriptions for WooCommerce  
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
-[![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
 
 <details><summary>Plugin Header</summary>
 
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.1.4  
-Last Updated:           29-Apr-2025  
+Stable tag:             2.1.5  
+Last Updated:           07-Jul-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires Plugins:       woocommerce  
-WC requires at least:   7.0  
-WC tested up to:        9.8  
+WC requires at least:   8.0  
+WC tested up to:        9.9  
 Requires PHP:           7.4  
 Contributors:           [kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:                GPLv3 or later  
