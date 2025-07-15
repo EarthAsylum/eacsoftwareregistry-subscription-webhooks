@@ -15,6 +15,7 @@ WC requires at least:   8.0
 WC tested up to:        9.9  
 Requires PHP:           7.4  
 Contributors:           [kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
+Donate link:            https://github.com/sponsors/EarthAsylum  
 License:                GPLv3 or later  
 License URI:            https://www.gnu.org/licenses/gpl.html  
 Tags:                   WooCommerce Subscriptions, WooCommerce Webhooks, SUMO subscriptions, subscriptions, {eac}SoftwareRegistry  
