@@ -1,8 +1,8 @@
 === {eac}SoftwareRegistry Subscriptions for WooCommerce ===
 Plugin URI:             https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.1.5
-Last Updated:           07-Jul-2025
+Stable tag:             2.1.6
+Last Updated:           24-Jul-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires Plugins:       woocommerce
@@ -188,6 +188,12 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 2.1.6 – July 24, 2025 =
+
++   Added registry_timezone and registry_locale to webhook payload.
++   Fix missing Sumo Subscription parent id.
++   Compatible with WooCommerce 10.0.
 
 = Version 2.1.5 – July 7, 2025 =
 

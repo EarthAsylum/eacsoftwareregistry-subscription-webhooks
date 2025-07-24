@@ -16,13 +16,13 @@
  * @wordpress-plugin
  * Plugin Name:				{eac}SoftwareRegistry Subscription WebHooks
  * Description:				Software Registration Server Subscription Webhooks for WooCommerce - adds a custom Webhook topic for subscription updates to WooCommerce Webhooks.
- * Version:					2.1.5
+ * Version:					2.1.6
  * Requires at least:		5.8
  * Tested up to:			6.8
  * Requires PHP:			7.4
  * Requires Plugins: 		woocommerce
  * WC requires at least: 	8.0
- * WC tested up to: 		9.9
+ * WC tested up to: 		10.0
  * Plugin URI:        		https://swregistry.earthasylum.com/subscriptions-for-woocommerce/
  * Author:					EarthAsylum Consulting
  * Author URI:				http://www.earthasylum.com
@@ -471,6 +471,9 @@ class eacSoftwareRegistry_Subscription_Webhooks
 			//	'payload' 		=> $payload
 			],
 			__METHOD__.' '.$resource.' '.current_action());
+
+		$payload['registry_timezone']	= wp_timezone_string();
+		$payload['registry_locale']		= get_locale();
 		return $payload;
 	}
 
@@ -631,6 +634,7 @@ class eacSoftwareRegistry_Subscription_Webhooks
 		$cancelled	= ($status == 'cancelled') ? $end : '';
 		return	[	// dates are UTC/GMT
 					'id'						=> $subscription->ID, // override order id
+					'parent_id'					=> get_post_meta( $subscription->ID, 'sumo_get_parent_order_id', true ),
 					'status'					=> $status,
 					'date_created'				=> $this->dateFormat( $parent->get_date_created() ),
 					'date_modified'				=> $this->dateFormat( $order->get_date_modified() ),
